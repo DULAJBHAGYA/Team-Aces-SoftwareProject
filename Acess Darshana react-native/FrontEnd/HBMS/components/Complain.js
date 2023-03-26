@@ -1,10 +1,12 @@
 // Complain.js
 import React, { useEffect, useState } from "react";
-import { Button, View, Text,TouchableOpacity,StyleSheet, TextInput,  } from "react-native";
+import { Button, View, Text,TouchableOpacity,StyleSheet, TextInput,KeyboardAvoidingView,
+  Platform,  } from "react-native";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome5 } from 'react-native-vector-icons';
 import { Picker } from '@react-native-picker/picker';
+import { Alert } from 'react-native';
 import { Keyboard } from 'expo';
 
 
@@ -12,6 +14,8 @@ import * as Font from 'expo-font';
 
 
 export default function Complain({ navigation }) {
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -50,13 +54,64 @@ export default function Complain({ navigation }) {
   }, [navigation]);
 
   const handleSubmit = () => {
-    // Do something with the form data
-    console.log(name, email, complainType, complain);
+    // Check if any of the fields are empty
+    if (!name || !email || !complainType || !complain) {
+      Alert.alert(
+        'Error',
+        'Please fill out all fields before submitting your complaint.',
+        [
+          { text: 'OK', onPress: () => console.log('OK Pressed') }
+        ],
+        {
+          titleStyle: {
+            color: 'darkblue',
+            fontFamily: 'Poppins-Bold',
+            fontSize: 20
+          },
+          alertStyle: {
+            backgroundColor: 'lightblue' // Change the background color of the alert box here
+          }
+        }
+      );
+    } else {
+      // Set loading state to true
+      setIsLoading(true);
+  
+      // Do something with the form data
+      console.log(name, email, complainType, complain);
     
+      // Show success alert
+      Alert.alert(
+        'Complain Submit Success',
+        'We apologize for the need to submit a complaint. Your concerns have been addressed to the Authority in the Transport. Please be assured that we will review your concerns and take the necessary action to resolve the problem.',
+        [
+          { text: 'OK', onPress: () => console.log('OK Pressed') }
+        ],
+        {
+          titleStyle: {
+            color: 'darkblue',
+            fontFamily: 'Poppins-Bold',
+            fontSize: 20
+          },
+          alertStyle: {
+            backgroundColor: 'lightblue' // Change the background color of the alert box here
+          }
+        }
+      );
+  
+      // Set loading state back to false
+      setIsLoading(false);
+    }
   }
+  
+  
+  
 
   return (
     <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.formContainer}>
       <View
         style={{
           width: 430,
@@ -109,20 +164,21 @@ export default function Complain({ navigation }) {
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Complain Type</Text>
         <Picker
-          style={styles.dropdown}
+          style={[styles.dropdown, {  borderWidth: 2, borderColor: 'darkblue', backgroundColor: 'white' }]}
           selectedValue={complainType}
           onValueChange={setComplainType}>
           <Picker.Item label="Complain list (please select) " value="" />
-          <Picker.Item label="Type 1" value="Type 1" />
-          <Picker.Item label="Type 2" value="Type 2" />
-          <Picker.Item label="Type 3" value="Type 3" />
-          <Picker.Item label="Type 4" value="Type 4" />
+          <Picker.Item label="Incorrect fare charge" value="Type 1" />
+          <Picker.Item label="Attitude or behavior of staff" value="Type 2" />
+          <Picker.Item label="Personal security" value="Type 3" />
+          <Picker.Item label="Reliability and punctuality" value="Type 4" />
+          <Picker.Item label="Other..." value="Type 5" />
         </Picker>
       </View>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Complain</Text>
         <TextInput
-          style={[styles.input, { height: 180 }]}
+          style={[styles.input, { height: 180 ,textAlignVertical: 'top'}]}
           placeholder="Enter your complain here"
           numberOfLines={20}
           value={complain}
@@ -131,11 +187,15 @@ export default function Complain({ navigation }) {
       </View>
      
       <TouchableOpacity
-        style={styles.submitButton}
-        onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Submit</Text>
-</TouchableOpacity>
-
+         style={styles.submitButton}
+         onPress={handleSubmit}
+         disabled={isLoading}
+      >
+     <Text style={styles.submitButtonText}>
+     {isLoading ? "Submitting..." : "Submit"}
+    </Text>
+    </TouchableOpacity>
+    </KeyboardAvoidingView>
 </SafeAreaView>
 );
 }
@@ -164,6 +224,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     fontSize: 16,
     padding: 10,
+    alignContent: 'center',
   },
   dropdown: {
     borderWidth:2,
@@ -173,7 +234,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     padding: 10,
     height: 50,
-    
+    backgroundColor: 'white' 
   },
   submitButton: {
     backgroundColor: 'darkblue',
@@ -190,5 +251,9 @@ const styles = StyleSheet.create({
   Home_icon: {
     marginRight: 2,
   },
+  formContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  }
 });
 

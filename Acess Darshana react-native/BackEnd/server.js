@@ -9,9 +9,9 @@ const port = 3000;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/myapp', { useNewUrlParser: true })
-  .then(() => console.log('MongoDB connected'))
+// Connect to MongoDB Atlas
+mongoose.connect('mongodb+srv://Darshana:uom12345@hbms.mn0sf7z.mongodb.net/?retryWrites=true&w=majority', { useNewUrlParser: true })
+  .then(() => console.log('MongoDB Atlas connected'))
   .catch(err => console.log(err));
 
 // Define schema for your collection
@@ -19,6 +19,7 @@ const Schema = mongoose.Schema;
 const mySchema = new Schema({
   name: String,
   email: String,
+  complain: String,
 });
 
 // Define model for your collection

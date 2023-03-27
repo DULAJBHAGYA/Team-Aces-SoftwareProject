@@ -1,9 +1,11 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
+import express from 'express';
+import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
+import cors from 'cors';
 
 const app = express();
 const port = 3000;
+app.use(cors());
 
 // Body-parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -19,6 +21,7 @@ const Schema = mongoose.Schema;
 const mySchema = new Schema({
   name: String,
   email: String,
+  complainType: String,
   complain: String,
 });
 
@@ -27,6 +30,7 @@ const MyModel = mongoose.model('MyModel', mySchema);
 
 // Routes
 app.post('/api/data', (req, res) => {
+  console.log("case 1");
   const myData = new MyModel(req.body);
   myData.save()
     .then(() => res.json('Data added successfully'))

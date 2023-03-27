@@ -8,6 +8,7 @@ import { FontAwesome5 } from 'react-native-vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { Alert } from 'react-native';
 import { Keyboard } from 'expo';
+import axios from 'axios';
 
 
 import * as Font from 'expo-font';
@@ -53,7 +54,7 @@ export default function Complain({ navigation }) {
     });
   }, [navigation]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Check if any of the fields are empty
     if (!name || !email || !complainType || !complain) {
       Alert.alert(
@@ -77,27 +78,53 @@ export default function Complain({ navigation }) {
       // Set loading state to true
       setIsLoading(true);
   
-      // Do something with the form data
-      console.log(name, email, complainType, complain);
-    
-      // Show success alert
-      Alert.alert(
-        'Complain Submit Success',
-        'We apologize for the need to submit a complaint. Your concerns have been addressed to the Authority in the Transport. Please be assured that we will review your concerns and take the necessary action to resolve the problem.',
-        [
-          { text: 'OK', onPress: () => console.log('OK Pressed') }
-        ],
-        {
-          titleStyle: {
-            color: 'darkblue',
-            fontFamily: 'Poppins-Bold',
-            fontSize: 20
-          },
-          alertStyle: {
-            backgroundColor: 'lightblue' // Change the background color of the alert box here
+      try {
+        // Send POST request to backend API
+        await axios.post('http://192.168.8.141:3000/api/data', {
+          name,
+          email,
+          complainType,
+          complain,
+        });
+  
+        // Show success alert
+        Alert.alert(
+          'Complain Submit Success',
+          'We apologize for the need to submit a complaint. Your concerns have been addressed to the Authority in the Transport. Please be assured that we will review your concerns and take the necessary action to resolve the problem.',
+          [
+            { text: 'OK', onPress: () => console.log('OK Pressed') }
+          ],
+          {
+            titleStyle: {
+              color: 'darkblue',
+              fontFamily: 'Poppins-Bold',
+              fontSize: 20
+            },
+            alertStyle: {
+              backgroundColor: 'lightblue' // Change the background color of the alert box here
+            }
           }
-        }
-      );
+        );
+      } catch (error) {
+        // Show error alert
+        Alert.alert(
+          'Error',
+          'An error occurred while submitting your complaint. Please try again later.',
+          [
+            { text: 'OK', onPress: () => console.log('OK Pressed') }
+          ],
+          {
+            titleStyle: {
+              color: 'darkblue',
+              fontFamily: 'Poppins-Bold',
+              fontSize: 20
+            },
+            alertStyle: {
+              backgroundColor: 'lightblue' // Change the background color of the alert box here
+            }
+          }
+        );
+      }
   
       // Set loading state back to false
       setIsLoading(false);
@@ -168,11 +195,11 @@ export default function Complain({ navigation }) {
           selectedValue={complainType}
           onValueChange={setComplainType}>
           <Picker.Item label="Complain list (please select) " value="" />
-          <Picker.Item label="Incorrect fare charge" value="Type 1" />
-          <Picker.Item label="Attitude or behavior of staff" value="Type 2" />
-          <Picker.Item label="Personal security" value="Type 3" />
-          <Picker.Item label="Reliability and punctuality" value="Type 4" />
-          <Picker.Item label="Other..." value="Type 5" />
+          <Picker.Item label="Incorrect fare charge" value="Incorrect fare charge" />
+          <Picker.Item label="Attitude or behavior of staff" value="Attitude or behavior of staff" />
+          <Picker.Item label="Personal security" value="Personal security" />
+          <Picker.Item label="Reliability and punctuality" value="Reliability and punctuality" />
+          <Picker.Item label="Other..." value="Other..." />
         </Picker>
       </View>
       <View style={styles.inputContainer}>

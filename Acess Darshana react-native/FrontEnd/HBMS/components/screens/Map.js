@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Button, View, Text, TouchableOpacity, StyleSheet, Linking } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,8 +20,8 @@ export default function Map() {
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync({
-        'Poppins-Regular': require('../assets/Fonts/Poppins-Regular.ttf'),
-        'Poppins-Bold': require('../assets/Fonts/Poppins-Bold.ttf'),
+        'Poppins-Regular': require('../../assets/Fonts/Poppins-Regular.ttf'),
+        'Poppins-Bold': require('../..//assets/Fonts/Poppins-Bold.ttf'),
       });
     }
 
@@ -45,37 +45,26 @@ export default function Map() {
           <FontAwesome5 name="home" size={25} color="darkblue" style={styles.icon} />
         </TouchableOpacity>
       ),
-      
-      
-      
     });
   }, [navigation]);
 
+  const handleEmergencyCall = () => {
+    Linking.openURL('tel:1969');
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-        <MapView
+      <MapView
         style={styles.map}
         initialRegion={region}
         scrollEnabled={true}
       />
-      <View style={styles.overlay1}>
-      <Text style={styles.text1} >Map</Text>
-      <TouchableOpacity onPress={() => navigation.navigate('Page1')}>
-        <Text>Go to Page 1</Text>
-      </TouchableOpacity>
-      <Button
-        title="Go Contacts"
-        onPress={() => navigation.navigate("Contact")}
-      />
-      <Icon.Button
-            name="facebook"
-            backgroundColor="#3b5998"
-            
-            
-            
-        onPress={() => alert('Login with Facebook')}>
-        Login with Facebook
-      </Icon.Button>
+
+      <View style={styles.overlay}>
+        <TouchableOpacity onPress={() => handleEmergencyCall('1969')} style={styles.emergencyButton}>
+          <FontAwesome5 name="phone" size={25} color="white" style={styles.emergencyIcon} />
+          <Text style={styles.emergencyText}>Expressway Hotline   1969</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -108,24 +97,27 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   overlay: {
-    
-    top: 400,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    paddingBottom: 5,
+    position: 'absolute',
+    bottom: 30,
+    right: 26,
   },
-  overlay1: {
-    
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: 'column',
+  emergencyButton: {
+    flexDirection: 'row',
+    backgroundColor: 'red',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: 'center',
     justifyContent: 'center',
-    
-    paddingBottom: 100,
   },
+  emergencyIcon: {
+    marginRight: 8,
+  },
+  emergencyText: {color: 'white',
+  fontSize: 20,
+  fontWeight: 'bold',
+},
+emergencyIcon: {
+marginRight: 10,
+},
 });

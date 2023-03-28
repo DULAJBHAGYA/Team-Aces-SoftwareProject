@@ -9,12 +9,15 @@ import { Picker } from '@react-native-picker/picker';
 import { Alert } from 'react-native';
 import { Keyboard } from 'expo';
 import axios from 'axios';
-
+import Circles  from '../../Data/Circles.js';
 
 import * as Font from 'expo-font';
 
 
 export default function Complain({ navigation }) {
+
+  const [emailIsValid, setEmailIsValid] = useState(false);
+  const emailRegex = /^\S+@\S+\.\S+$/;
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,11 +26,18 @@ export default function Complain({ navigation }) {
   const [complainType, setComplainType] = useState("");
   const [complain, setComplain] = useState("");
 
+
+const validateEmail = (email) => {
+  setEmailIsValid(emailRegex.test(email));
+  return emailRegex.test(email);
+};
+  
+
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync({
-        'Poppins-Regular': require('../assets/Fonts/Poppins-Regular.ttf'),
-        'Poppins-Bold': require('../assets/Fonts/Poppins-Bold.ttf'),
+        'Poppins-Regular': require('../../assets/Fonts/Poppins-Regular.ttf'),
+        'Poppins-Bold': require('../../assets/Fonts/Poppins-Bold.ttf'), 
       });
     }
 
@@ -60,6 +70,24 @@ export default function Complain({ navigation }) {
       Alert.alert(
         'Error',
         'Please fill out all fields before submitting your complaint.',
+        [
+          { text: 'OK', onPress: () => console.log('OK Pressed') }
+        ],
+        {
+          titleStyle: {
+            color: 'darkblue',
+            fontFamily: 'Poppins-Bold',
+            fontSize: 20
+          },
+          alertStyle: {
+            backgroundColor: 'lightblue' // Change the background color of the alert box here
+          }
+        }
+      );
+    } else if (!validateEmail(email)) {
+      Alert.alert(
+        'Error',
+        'Please enter a valid email address.',
         [
           { text: 'OK', onPress: () => console.log('OK Pressed') }
         ],
@@ -129,9 +157,7 @@ export default function Complain({ navigation }) {
       // Set loading state back to false
       setIsLoading(false);
     }
-  }
-  
-  
+  };
   
 
   return (
@@ -139,37 +165,7 @@ export default function Complain({ navigation }) {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.formContainer}>
-      <View
-        style={{
-          width: 430,
-          height: 377,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-        }}>
-        <View
-          style={{
-            position: 'absolute',
-            top: 450,
-            left: 110,
-            width: 300,
-            height: 300,
-            borderRadius: 300,
-            backgroundColor: 'rgba(132, 206, 235, 0.3)',
-          }}
-        />
-        <View
-          style={{
-            position: 'absolute',
-            top: 350,
-            left: 250,
-            width: 300,
-            height: 300,
-            borderRadius: 300,
-            backgroundColor: 'rgba(132, 206, 235, 0.3)',
-          }}
-        />
-      </View>
+     <Circles /> 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Name</Text>
         <TextInput
@@ -179,15 +175,19 @@ export default function Complain({ navigation }) {
           onChangeText={setName}
         />
       </View>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email Address</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your email address"
-          value={email}
-          onChangeText={setEmail}
-        />
-      </View>
+     <View style={styles.inputContainer}>
+  <Text style={styles.label}>Email Address</Text>
+  <TextInput
+    style={styles.input}
+    placeholder="Enter your email address"
+    value={email}
+    onChangeText={setEmail}
+    keyboardType="email-address"
+    autoCapitalize="none"
+    autoCompleteType="email"
+    textContentType="emailAddress"
+  />
+</View>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Complain Type</Text>
         <Picker

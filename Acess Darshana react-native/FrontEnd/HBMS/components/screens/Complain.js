@@ -108,7 +108,7 @@ const validateEmail = (email) => {
   
       try {
         // Send POST request to backend API
-        await axios.post('http://192.168.8.141:3000/api/data', {
+        await axios.post('http://10.10.18.244:4000/api/data', {
           name,
           email,
           complainType,
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingHorizontal: 20,
-    paddingTop: 0, // add top padding
+    paddingTop: 0, 
   },
   inputContainer: {
     marginBottom: 20,

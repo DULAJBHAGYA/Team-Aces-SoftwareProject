@@ -49,7 +49,7 @@ export default function Map() {
   }, [navigation]);
 
   const handleEmergencyCall = () => {
-    Linking.openURL('tel:1969');
+    Linking.openURL('tel: 1969');
   }
 
   return (

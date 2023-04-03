@@ -6,10 +6,14 @@ import Circles  from '../../Data/Circles.js';
 import * as Font from 'expo-font';
 import DATA from '../../Data/contact_details.js';
 
+
 export default function Contact({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState('');
   const [selectedContact, setSelectedContact] = useState('');
+  const [selectedLatitude, setSelectedLatitude] = useState('');
+  const [selectedLongitude, setSelectedLongitude] = useState('');
+
   const [contacts, setContacts] = useState(DATA); // <-- added this state variable
 
   useEffect(() => {
@@ -46,6 +50,8 @@ export default function Contact({ navigation }) {
   const toggleModal = (item) => {
     setSelectedPhoneNumber(item.phone);
     setSelectedContact(item.name);
+    setSelectedLatitude(item.latitude); 
+    setSelectedLongitude(item.longitude);
     setModalVisible(!modalVisible);
   };
 
@@ -58,6 +64,11 @@ export default function Contact({ navigation }) {
     Linking.openURL(`tel:${phoneNumber}`);
   };
 
+  const handleLocationPress = (latitude, longitude) => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    Linking.openURL(url);
+  };
+
   
 
   const renderItem = ({ item }) => {
@@ -66,6 +77,7 @@ export default function Contact({ navigation }) {
         <Text style={styles.contactName}>{item.name}</Text>
         <Text style={styles.contactPhone}>{item.phone}</Text>
       </TouchableOpacity>
+      
     );
   };
 
@@ -94,6 +106,11 @@ export default function Contact({ navigation }) {
         <TouchableOpacity style={styles.modalButton} onPress={() => handleCopyPress(selectedPhoneNumber)}>
         <FontAwesome name="copy" size={25} color="white" />
         <Text style={styles.modalButtonText}>Copy</Text>
+        </TouchableOpacity>
+      
+        <TouchableOpacity style={styles.modalButton} onPress={() => handleLocationPress(selectedLatitude, selectedLongitude)}>
+         <FontAwesome name="location-arrow" size={25} color="white" style={styles.locationIcon} />
+         <Text style={styles.modalButtonText}>View on map</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
         <FontAwesome name="close" size={25} color="white" />
@@ -138,21 +155,22 @@ export default function Contact({ navigation }) {
             borderRadius: 20,
             backgroundColor: 'white',
             borderWidth: 2,
-            paddingHorizontal: 4,
+            paddingHorizontal:0,
             paddingVertical: 50,
             position: 'absolute',
             top: '30%',
-            left: '10%',
+            left: '5%',
             borderColor: '#ddd',
-             shadowColor: '#000',
+            shadowColor: '#000',
             shadowOffset: {
-             width: 0,
-             height: 3,
-                         },
+              width: 0,
+              height: 3,
+              
+            },
             shadowOpacity: 0.29,
             shadowRadius: 4.65,
-
             elevation: 7,
+            justifyContent: 'space-evenly',
           },
           modalTitle: {
             fontSize: 30,
@@ -160,6 +178,21 @@ export default function Contact({ navigation }) {
             fontFamily: 'Poppins-Bold',
             color: '#444',
             marginBottom: 20,
+            flexDirection: 'row', 
+            alignItems: 'center', 
+          },
+          locationIcon: {
+            marginRight: 10, 
+          },
+          locationButton: {
+            backgroundColor: '#4a90e2',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 10,
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            marginTop: 20,
           },
           modalPhone: {
             fontSize: 28,
@@ -171,22 +204,28 @@ export default function Contact({ navigation }) {
           modalButtonsContainer: {
             flexDirection: 'row',
             justifyContent: 'space-between',
-            paddingVertical: 10
+            paddingVertical: 5,
+            justifyContent: 'space-between',
           },
           modalButton: {
+            
             backgroundColor: '#4a90e2',
             padding: 10,
-            borderRadius: 5,
+            borderRadius: 20,
             alignItems: 'center',
-            width: '25%',
-            marginHorizontal: 5,
+            width: '22%',
+            marginHorizontal: 2,
+            elevation: 5,
           },
           modalButtonText: {
+            backgroundColor: '#4a90e2',
             color: '#fff',
             fontFamily: 'Poppins-Regular',
             fontSize: 16,
             marginTop: 5,
+            alignItems: 'center',
           },
+          
           icon: {
             marginRight: 20,
           },

@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 
 const app = express();
-const port = 3000;
+const port = 4000;
 app.use(cors());
 
 // Body-parser middleware
@@ -30,7 +30,7 @@ const MyModel = mongoose.model('MyModel', mySchema);
 
 // Routes
 app.post('/api/data', (req, res) => {
-  console.log("case 1");
+  console.log("BackEND Started");
   const myData = new MyModel(req.body);
   myData.save()
     .then(() => res.json('Data added successfully'))

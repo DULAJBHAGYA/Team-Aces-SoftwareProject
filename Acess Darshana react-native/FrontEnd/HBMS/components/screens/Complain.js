@@ -1,21 +1,33 @@
 // Complain.js
 import React, { useEffect, useState } from "react";
-import { Button, View, Text,TouchableOpacity,StyleSheet, TextInput,KeyboardAvoidingView,
-  Platform,  } from "react-native";
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { FontAwesome5 } from 'react-native-vector-icons';
-import { Picker } from '@react-native-picker/picker';
-import { Alert } from 'react-native';
-import { Keyboard } from 'expo';
-import axios from 'axios';
-import Circles  from '../../Data/Circles.js';
+import {
+  Button,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Image,
+} from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { FontAwesome5 } from "react-native-vector-icons";
+import { Picker } from "@react-native-picker/picker";
+import { Alert } from "react-native";
+import { Keyboard } from "expo";
+import axios from "axios";
+import Circles from "../../Data/Circles.js";
+import Modal from "react-native-modal";
+import ErrorModal from "../../Data/ErrorModal.js";
+import SuccessModal from "../../Data/SuccessModal.js";
+import * as ImagePicker from 'expo-image-picker';
 
-import * as Font from 'expo-font';
-
+import * as Font from "expo-font";
 
 export default function Complain({ navigation }) {
-
   const [emailIsValid, setEmailIsValid] = useState(false);
   const emailRegex = /^\S+@\S+\.\S+$/;
 
@@ -25,19 +37,44 @@ export default function Complain({ navigation }) {
   const [email, setEmail] = useState("");
   const [complainType, setComplainType] = useState("");
   const [complain, setComplain] = useState("");
+  const [isErrorModalVisible, setIsErrorModalVisible] = useState(false);
 
+  const [successVisible, setSuccessVisible] = useState(false);
 
-const validateEmail = (email) => {
-  setEmailIsValid(emailRegex.test(email));
-  return emailRegex.test(email);
+  const [errorVisible, setErrorVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleModalClose = () => {
+    setIsErrorModalVisible(false);
+    setSuccessVisible(false);
+  };
+
+  const [image, setImage] = useState(null);
+
+  const pickImage = async () => {
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+
+  if (!result.canceled) {
+    setImage(result.uri);
+  }
 };
   
+
+  const validateEmail = (email) => {
+    setEmailIsValid(emailRegex.test(email));
+    return emailRegex.test(email);
+  };
 
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync({
-        'Poppins-Regular': require('../../assets/Fonts/Poppins-Regular.ttf'),
-        'Poppins-Bold': require('../../assets/Fonts/Poppins-Bold.ttf'), 
+        "Poppins-Regular": require("../../assets/Fonts/Poppins-Regular.ttf"),
+        "Poppins-Bold": require("../../assets/Fonts/Poppins-Bold.ttf"),
       });
     }
 
@@ -46,112 +83,82 @@ const validateEmail = (email) => {
 
   useEffect(() => {
     navigation.setOptions({
-      title: 'Complain', // Set Header Title
-      headerTintColor: 'darkblue', // Set font color of navigation bar
+      title: "Complain", // Set Header Title
+      headerTintColor: "darkblue", // Set font color of navigation bar
       headerStyle: {
-        backgroundColor: 'white', // Set background color of navigation bar
+        backgroundColor: "white", // Set background color of navigation bar
       },
       headerTitleStyle: {
-        fontWeight: 'bold', // Set font weight of navigation bar
-        fontFamily: 'Poppins-Bold', // Set font family of navigation bar
+        fontWeight: "bold", // Set font weight of navigation bar
+        fontFamily: "Poppins-Bold", // Set font family of navigation bar
         fontSize: 30,
       },
       headerRight: () => (
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-          <FontAwesome5 name="home" size={25} color="darkblue" style={styles.Home_icon} />
+          <FontAwesome5
+            name="home"
+            size={25}
+            color="darkblue"
+            style={styles.Home_icon}
+          />
         </TouchableOpacity>
       ),
     });
   }, [navigation]);
 
+
   const handleSubmit = async () => {
     // Check if any of the fields are empty
     if (!name || !email || !complainType || !complain) {
-      Alert.alert(
-        'Error',
-        'Please fill out all fields before submitting your complaint.',
-        [
-          { text: 'OK', onPress: () => console.log('OK Pressed') }
-        ],
-        {
-          titleStyle: {
-            color: 'darkblue',
-            fontFamily: 'Poppins-Bold',
-            fontSize: 20
-          },
-          alertStyle: {
-            backgroundColor: 'lightblue' // Change the background color of the alert box here
-          }
-        }
-      );
+      setErrorVisible(true);
+      setErrorMessage("Please fill out all fields before submitting your complaint.");
     } else if (!validateEmail(email)) {
-      Alert.alert(
-        'Error',
-        'Please enter a valid email address.',
-        [
-          { text: 'OK', onPress: () => console.log('OK Pressed') }
-        ],
-        {
-          titleStyle: {
-            color: 'darkblue',
-            fontFamily: 'Poppins-Bold',
-            fontSize: 20
-          },
-          alertStyle: {
-            backgroundColor: 'lightblue' // Change the background color of the alert box here
-          }
-        }
-      );
+      setErrorVisible(true);
+      setErrorMessage("Please enter a valid email address.");
     } else {
       // Set loading state to true
       setIsLoading(true);
   
       try {
-        // Send POST request to backend API
-        await axios.post('http://10.10.18.244:4000/api/data', {
-          name,
-          email,
-          complainType,
-          complain,
+        // Create a new instance of FormData
+        const formData = new FormData();
+  
+        // Append the image file to the form data
+        if (image) {
+          const fileExtension = image.split(".").pop();
+          formData.append("image", {
+            uri: image,
+            name: `image.${fileExtension}`,
+            type: `image/${fileExtension}`,
+          });
+        }
+  
+        // Append the form data fields to the form data object
+        formData.append("name", name);
+        formData.append("email", email);
+        formData.append("complainType", complainType);
+        formData.append("complain", complain);
+  
+        // Send POST request to backend API with form data object
+        await axios.post("http://192.168.8.141:4000/api/data", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
   
         // Show success alert
-        Alert.alert(
-          'Complain Submit Success',
-          'We apologize for the need to submit a complaint. Your concerns have been addressed to the Authority in the Transport. Please be assured that we will review your concerns and take the necessary action to resolve the problem.',
-          [
-            { text: 'OK', onPress: () => console.log('OK Pressed') }
-          ],
-          {
-            titleStyle: {
-              color: 'darkblue',
-              fontFamily: 'Poppins-Bold',
-              fontSize: 20
-            },
-            alertStyle: {
-              backgroundColor: 'lightblue' // Change the background color of the alert box here
-            }
-          }
-        );
+        setSuccessVisible(true);
+  
+        // Clear all input fields
+        setName("");
+        setEmail("");
+        setComplainType("");
+        setComplain("");
+        setImage("");
+  
       } catch (error) {
-        // Show error alert
-        Alert.alert(
-          'Error',
-          'An error occurred while submitting your complaint. Please try again later.',
-          [
-            { text: 'OK', onPress: () => console.log('OK Pressed') }
-          ],
-          {
-            titleStyle: {
-              color: 'darkblue',
-              fontFamily: 'Poppins-Bold',
-              fontSize: 20
-            },
-            alertStyle: {
-              backgroundColor: 'lightblue' // Change the background color of the alert box here
-            }
-          }
-        );
+        setErrorVisible(true);
+        setErrorMessage("An error occurred while submitting your complaint. Please try again later.");
       }
   
       // Set loading state back to false
@@ -159,13 +166,41 @@ const validateEmail = (email) => {
     }
   };
   
+  
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.formContainer}>
-     <Circles /> 
+   
+    <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+  <SafeAreaView style={styles.container}>
+    <ErrorModal
+      visible={errorVisible}
+      setVisible={setErrorVisible}
+      onClose={() => setErrorMessage("")}
+      animationType="slide"
+      backgroundColor="white"
+      iconColor="red"
+      iconName="close"
+      iconAnimationType="shake"
+      title="Error !!!"
+      message={errorMessage}
+    />
+    <SuccessModal
+      visible={successVisible}
+      setVisible={setSuccessVisible}
+      onClose={handleModalClose}
+      animationType="slide"
+      backgroundColor="white"
+      iconColor="green"
+      iconName="check-circle"
+      iconAnimationType="pulse"
+      title="Complaint Successfully !!!"
+      message="We apologize for the need to submit a complaint. Your concerns have been addressed to the Authority in the Transport. Please be assured that we will review your concerns and take the necessary action to resolve the problem."
+    />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'android' ? 'padding' : 'height'}
+      style={{ ...styles.formContainer, backgroundColor: 'white', padding: 0,  }}
+    >
+      <Circles />
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Name</Text>
         <TextInput
@@ -175,23 +210,23 @@ const validateEmail = (email) => {
           onChangeText={setName}
         />
       </View>
-     <View style={styles.inputContainer}>
-  <Text style={styles.label}>Email Address</Text>
-  <TextInput
-    style={styles.input}
-    placeholder="Enter your email address"
-    value={email}
-    onChangeText={setEmail}
-    keyboardType="email-address"
-    autoCapitalize="none"
-    autoCompleteType="email"
-    textContentType="emailAddress"
-  />
-</View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Email Address</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your email address"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCompleteType="email"
+          textContentType="emailAddress"
+        />
+      </View>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Complain Type</Text>
         <Picker
-          style={[styles.dropdown, {  borderWidth: 2, borderColor: 'darkblue', backgroundColor: 'white' }]}
+          style={[styles.dropdown, { borderWidth: 2, borderColor: 'darkblue', backgroundColor: 'white' }]}
           selectedValue={complainType}
           onValueChange={setComplainType}>
           <Picker.Item label="Complain list (please select) " value="" />
@@ -203,27 +238,45 @@ const validateEmail = (email) => {
         </Picker>
       </View>
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Complain</Text>
-        <TextInput
-          style={[styles.input, { height: 180 ,textAlignVertical: 'top'}]}
-          placeholder="Enter your complain here"
-          numberOfLines={20}
-          value={complain}
-          onChangeText={setComplain}
-        />
-      </View>
-     
+  <Text style={styles.label}>Complain</Text>
+  <View style={{ position: 'relative' }}>
+    <TextInput
+      style={[styles.input, { height: 200, textAlignVertical: 'top' }]}
+      placeholder="Enter your complain here"
+      numberOfLines={20}
+      value={complain}
+      onChangeText={setComplain}
+    />
+    <View style={{ position: 'absolute', bottom: 2, right: 10 }}>
+      {image && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingBottom: 10 }}>
+          <Image source={{ uri: image }} style={{ width: 80, height: 80, marginRight: 10 }} />
+          <TouchableOpacity onPress={() => setImage(null)}>
+            <FontAwesome5 name="minus-circle" size={24} color="red" />
+          </TouchableOpacity>
+        </View>
+      )}
+      <TouchableOpacity onPress={pickImage}>
+        <FontAwesome5 name="paperclip" size={24} color="darkblue" />
+      </TouchableOpacity>
+    </View>
+  </View>
+</View>
+        
       <TouchableOpacity
-         style={styles.submitButton}
-         onPress={handleSubmit}
-         disabled={isLoading}
+        style={styles.submitButton}
+        onPress={handleSubmit}
+        disabled={isLoading}
       >
-     <Text style={styles.submitButtonText}>
-     {isLoading ? "Submitting..." : "Submit"}
-    </Text>
-    </TouchableOpacity>
+        <Text style={styles.submitButtonText}>
+          {isLoading ? "Submitting..." : "Submit"}
+        </Text>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
-</SafeAreaView>
+   
+  </SafeAreaView>
+</ScrollView>
+
 );
 }
 
@@ -233,6 +286,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 20,
     paddingTop: 0, 
+  },
+  scrollViewContainer: {
+    flexGrow: 0.25,
   },
   inputContainer: {
     marginBottom: 20,
@@ -269,6 +325,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     alignItems: 'center',
+    marginBottom: 2,
   },
   submitButtonText: {
     fontFamily: 'Poppins-Bold',
@@ -283,4 +340,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   }
 });
-

@@ -52,17 +52,18 @@ export default function Complain({ navigation }) {
   const [image, setImage] = useState(null);
 
   const pickImage = async () => {
-  let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    aspect: [4, 3],
-    quality: 1,
-  });
-
-  if (!result.canceled) {
-    setImage(result.uri);
-  }
-};
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+  
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+  
   
 
   const validateEmail = (email) => {
@@ -165,7 +166,6 @@ export default function Complain({ navigation }) {
       setIsLoading(false);
     }
   };
-  
   
 
   return (
@@ -271,6 +271,9 @@ export default function Complain({ navigation }) {
         <Text style={styles.submitButtonText}>
           {isLoading ? "Submitting..." : "Submit"}
         </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate("ViewComplaints")}>
+        <Text style={styles.cancelButtonText}>View Complaints</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
    

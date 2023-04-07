@@ -8,6 +8,7 @@ import Contact from "./components/screens/Contact";
 import Map from "./components/screens/Map";
 import complain from "./components/screens/Complain";
 import Help_Support from "./components/screens/Help_Support";
+import ViewComplaints from "./components/screens/ViewComplaints";
 
 import Faq from "./components/screens/Faq";
 
@@ -23,6 +24,7 @@ export default function App() {
         <Stack.Screen name="Help_Support" component={Help_Support} />
         <Stack.Screen name="Complain" component={complain} />
         <Stack.Screen name="Faq" component={Faq} />
+        <Stack.Screen name="ViewComplaints" component={ViewComplaints} />
       </Stack.Navigator>
     </NavigationContainer>
   );

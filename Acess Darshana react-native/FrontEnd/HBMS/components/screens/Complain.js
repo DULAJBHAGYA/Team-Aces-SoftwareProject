@@ -308,9 +308,13 @@ export default function Complain({ navigation }) {
           {isLoading ? "Submitting..." : "Submit"}
         </Text>
       </TouchableOpacity>
+      <View style={styles.ViewButtonContainer}>
+        <FontAwesome5 name="eye" size={24} color="darkblue" />
       <TouchableOpacity onPress={() => navigation.navigate("ViewComplaints")}>
-        <Text style={styles.cancelButtonText}>View Complaints</Text>
+        
+        <Text style={styles.ViewButtonText}>View Complaints</Text>
       </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
    
   </SafeAreaView>
@@ -377,5 +381,18 @@ const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     justifyContent: 'center',
+  },
+  ViewButtonText: {
+    fontFamily: 'Poppins-regular',
+    color: 'darkblue',
+    fontSize: 18,
+    textDecorationLine: 'underline',
+  },
+  ViewButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    marginTop: 5,
   }
+  
 });

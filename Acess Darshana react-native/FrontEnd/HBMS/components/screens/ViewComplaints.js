@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
       },
       dateTime: {
         fontSize: 12,
-        color: 'DarkBlue',
+        color: 'darkblue',
       },
       loadMoreContainer: {
         flex: 1,

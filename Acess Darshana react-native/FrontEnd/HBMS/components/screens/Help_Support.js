@@ -9,14 +9,19 @@ import * as Font from 'expo-font';
 
 
 export default function Help_Support({ navigation }) {
-
+  const [dateTime, setDateTime] = useState(new Date());
   const [] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   const handleCallPress = (phoneNumber) => {
     Linking.openURL(`tel:${phoneNumber}`);
   };
-
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync({
@@ -57,13 +62,16 @@ export default function Help_Support({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.dateTimeContainer}>
+        <Text style={styles.dateTime}>{dateTime.toLocaleString()}</Text>
+      </View>
       <Circles /> 
-    <View style={styles.dateContainer}>
-      <Text style={styles.dateText}>{new Date().toLocaleDateString()}</Text>
-    </View>
     <View style={styles.modalContainer}>
+      
       <View style={styles.modalContent}>
+        
         <Image source={require('../../assets/help.png')} style={styles.modalImage} />
+        
         <Text style={styles.modalTitle}>How can we help?</Text>
         <View style={styles.gridContainer}>
           <TouchableOpacity style={styles.gridItem}>
@@ -128,6 +136,7 @@ const styles = StyleSheet.create({
     marginBottom: 51,
   },
   modalContainer: {
+    paddingTop: 50,
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -217,5 +226,14 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 10,
+  },
+  dateTimeContainer: {
+    position: 'absolute',
+    top: 10,
+    left: 20,
+  },
+  dateTime: {
+    fontSize: 15,
+    color: "darkblue",
   },
 });

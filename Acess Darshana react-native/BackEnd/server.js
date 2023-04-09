@@ -11,6 +11,16 @@ import validator from 'validator';
 const app = express();
 const port = 4000;
 app.use(cors());
+const prefix = 'CMP';
+const min = 1000;
+const max = 9999;
+
+function generateUniqueId() {
+  const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+  return `${prefix}${randomNum}`;
+}
+
+
 
 // Body-parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -62,8 +72,8 @@ app.post('/api/data', upload.single('image'), async (req, res) => {
   try {
     const { name, email, complainType, complain } = req.body;
     const image = req.file ? req.file.filename : '';
-    const id = uuidv4(); // Generate unique ID
-    
+    const id = generateUniqueId();
+
     // Validate the email field using the "validator" package
     if (!validator.isEmail(email)) {
       res.status(400).json({ message: 'Invalid email address.' });
@@ -77,17 +87,21 @@ app.post('/api/data', upload.single('image'), async (req, res) => {
       complainType,
       complain,
       image,
-      createdAt: new Date().toLocaleString() // Set createdAt field to the current date and time on the server device in a formatted string
+      createdAt: new Date().toLocaleString(), // Set createdAt field to the current date and time on the server device in a formatted string
     });
-    await myData.save();
-    console.log('Data saved successfully:', myData);
-    res.json(myData); // Return saved data with generated ID
+
+    const savedData = await myData.save();
+    console.log('Data saved successfully:', savedData);
+    
+    // Return saved data with generated ID
+    res.json({ data: savedData, uniqueId:id });
     
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'An error occurred while saving the complaint data.' });
   }
 });
+
 
 
 // Define the endpoint for getting all complaints

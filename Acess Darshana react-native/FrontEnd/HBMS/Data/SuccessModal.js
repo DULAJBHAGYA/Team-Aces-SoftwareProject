@@ -37,6 +37,7 @@ const SuccessModal = ({
           </Animatable.View>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
+          <Text >  </Text>
         </View>
       </TouchableOpacity>
     </Modal>

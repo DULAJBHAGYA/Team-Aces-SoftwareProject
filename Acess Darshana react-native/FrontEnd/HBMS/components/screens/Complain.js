@@ -11,6 +11,7 @@ import {
   Platform,
   ScrollView,
   Image,
+  Clipboard,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -24,6 +25,8 @@ import Modal from "react-native-modal";
 import ErrorModal from "../../Data/ErrorModal.js";
 import SuccessModal from "../../Data/SuccessModal.js";
 import * as ImagePicker from 'expo-image-picker';
+import { ToastAndroid } from 'react-native';
+
 
 import * as Font from "expo-font";
 
@@ -44,6 +47,8 @@ export default function Complain({ navigation }) {
   const [errorVisible, setErrorVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [id, setId] = useState(null);
+  
   const handleModalClose = () => {
     setIsErrorModalVisible(false);
     setSuccessVisible(false);
@@ -64,6 +69,7 @@ export default function Complain({ navigation }) {
     }
   };
   
+ 
   
 
   const validateEmail = (email) => {
@@ -141,14 +147,21 @@ export default function Complain({ navigation }) {
         formData.append("complain", complain);
   
         // Send POST request to backend API with form data object
-        await axios.post("http://192.168.8.141:4000/api/data", formData, {
+        axios.post("http://192.168.8.141:4000/api/data", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+        }).then((response) => {
+            console.log(response.data);
+          // Show success modal with ID
+          const id = response.data.uniqueId;
+          setId(id);
+          setSuccessVisible(true);
+        }).catch((error) => {
+          console.error(error);
+          setErrorVisible(true);
+          setErrorMessage('An error occurred while submitting your complaint. Please try again later.');
         });
-  
-        // Show success alert
-        setSuccessVisible(true);
   
         // Clear all input fields
         setName("");
@@ -167,6 +180,7 @@ export default function Complain({ navigation }) {
     }
   };
   
+  
 
   return (
    
@@ -184,18 +198,40 @@ export default function Complain({ navigation }) {
       title="Error !!!"
       message={errorMessage}
     />
-    <SuccessModal
-      visible={successVisible}
-      setVisible={setSuccessVisible}
-      onClose={handleModalClose}
-      animationType="slide"
-      backgroundColor="white"
-      iconColor="green"
-      iconName="check-circle"
-      iconAnimationType="pulse"
-      title="Complaint Successfully !!!"
-      message="We apologize for the need to submit a complaint. Your concerns have been addressed to the Authority in the Transport. Please be assured that we will review your concerns and take the necessary action to resolve the problem."
-    />
+   <SuccessModal
+  visible={successVisible}
+  setVisible={setSuccessVisible}
+  onClose={handleModalClose}
+  animationType="slide"
+  backgroundColor="white"
+  iconColor="green"
+  iconName="check-circle"
+  id={id}
+  iconAnimationType="pulse"
+  title="Complaint Successfully !!!"
+  message={
+    <>
+      <Text style={{ marginBottom: 10 }}>
+        We apologize for the need to submit a complaint. Your concerns have been addressed to the Authority in the Transport. Please be assured that we will review your concerns and take the necessary action to resolve the problem. Your complaint ID is  :   
+      </Text>
+      <TouchableOpacity
+        style={{ position: 'absolute', top: 75, right: 40 }}
+        onPress={() => {
+          Clipboard.setString(id);
+          ToastAndroid.show("Complaint ID copied to clipboard", ToastAndroid.SHORT);
+        }}
+      >
+        <Text style={{ fontWeight: "bold", fontSize: 34, fontStyle: 'italic', color: 'red' }}>
+          {id}
+        </Text>
+      </TouchableOpacity>
+    </>
+  }
+/>
+
+
+
+
     <KeyboardAvoidingView
       behavior={Platform.OS === 'android' ? 'padding' : 'height'}
       style={{ ...styles.formContainer, backgroundColor: 'white', padding: 0,  }}

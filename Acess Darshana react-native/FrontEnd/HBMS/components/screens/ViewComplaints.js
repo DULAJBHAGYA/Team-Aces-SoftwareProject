@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 
 import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity, LayoutAnimation,Alert, TextInput } from 'react-native';
@@ -5,61 +6,98 @@ import { FontAwesome } from '@expo/vector-icons'; // import the FontAwesome icon
 import { Clipboard } from 'react-native';
 import { Linking } from 'react-native';
 import LottieView from 'lottie-react-native';
+import Circles from "../../Data/Circles.js";
+import { FontAwesome5 } from "react-native-vector-icons";
+import * as Font from 'expo-font';
 
 
 
+const ViewComplaints = ({ navigation }) => {
+    const [complaints, setComplaints] = useState([]);
+    const [expanded, setExpanded] = useState({});
+    const [itemDetailsHeight, setItemDetailsHeight] = useState({});
+    const [searchQuery, setSearchQuery] = useState('');
+    const [refreshing, setRefreshing] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [refreshingAnimation, setRefreshingAnimation] = useState(false);
+    const [dateTime, setDateTime] = useState(new Date());
+    const [currentPage, setCurrentPage] = useState(1);
+    const [complaintsPerPage, setComplaintsPerPage] = useState(10);
+    const [isLoading, setIsLoading] = useState(false);
 
+    useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        "Poppins-Regular": require("../../assets/Fonts/Poppins-Regular.ttf"),
+        "Poppins-Bold": require("../../assets/Fonts/Poppins-Bold.ttf"),
+      });
+    }
 
-const ViewComplaints = () => {
-  const [complaints, setComplaints] = useState([]);
-  const [expanded, setExpanded] = useState({});
-  const [itemDetailsHeight, setItemDetailsHeight] = useState({});
-  const [searchQuery, setSearchQuery] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
- const [loading, setLoading] = useState(false);
- const [refreshingAnimation, setRefreshingAnimation] = useState(false);
- const [dateTime, setDateTime] = useState(new Date());
- const [currentPage, setCurrentPage] = useState(1);
-const [complaintsPerPage, setComplaintsPerPage] = useState(10);
- 
-
- useEffect(() => {
-    const interval = setInterval(() => {
-      setDateTime(new Date());
-    }, 1000);
-    return () => clearInterval(interval);
+    loadFonts();
   }, []);
 
-  useEffect(() => {
-    fetch(`http://192.168.8.141:4000/api/data?page=${currentPage}&limit=${complaintsPerPage}`)
-      .then(response => response.json())
-      .then(data => {
-        // sort the data by date and reverse the array
-        data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setComplaints(data);
-      })
-      .catch(error => console.error(error));
-  }, [currentPage, complaintsPerPage]);
+    useEffect(() => {
+        navigation.setOptions({
+          title: "View Complains", // Set Header Title
+          headerTintColor: "darkblue", // Set font color of navigation bar
+          headerStyle: {
+            backgroundColor: "white", // Set background color of navigation bar
+          },
+          headerTitleStyle: {
+            fontWeight: "bold", // Set font weight of navigation bar
+            fontFamily: "Poppins-Bold", // Set font family of navigation bar
+            fontSize: 25,
+          },
+          headerRight: () => (
+            <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+              <FontAwesome5
+                name="home"
+                size={25}
+                color="darkblue"
+                style={styles.Home_icon}
+              />
+            </TouchableOpacity>
+          ),
+        });
+      }, [navigation]);
+    
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setDateTime(new Date());
+      }, 1000);
+      return () => clearInterval(interval);
+    }, []);
   
-  const toggleComplaintDetails = (id) => {
-    LayoutAnimation.easeInEaseOut();
-    setExpanded(prevExpanded => ({ ...prevExpanded, [id]: !prevExpanded[id] }));
-    // update the height of the itemDetails view
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const height = expanded[id] ? 0 : 'auto';
-    setItemDetailsHeight(prevItemDetailsHeight => ({ ...prevItemDetailsHeight, [id]: height }));
-  };
-
-  const handleCopy = (item) => {
-    const complaintDetails = `Name: ${item.name}\nEmail: ${item.email}\nComplain Type: ${item.complainType}\nComplain: ${item.complain}\nCreated At: ${item.createdAt}`;
-    Clipboard.setString(complaintDetails);
-    Alert.alert('Success', 'Complaint details copied to clipboard');
-  };
+    useEffect(() => {
+      fetch(`http://192.168.8.141:4000/api/data?page=${currentPage}&limit=${complaintsPerPage}`)
+        .then((response) => response.json())
+        .then((data) => {
+          // sort the data by date and reverse the array
+          data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setComplaints(data);
+        })
+        .catch((error) => console.error(error));
+    }, [currentPage, complaintsPerPage]);
   
-  const handleCopyId = (id) => {
-    Clipboard.setString(id);
-    Alert.alert("ID Copied", `ID: ${id} has been copied to clipboard`);
-  }
+    const toggleComplaintDetails = (id) => {
+      LayoutAnimation.easeInEaseOut();
+      setExpanded((prevExpanded) => ({ ...prevExpanded, [id]: !prevExpanded[id] }));
+      // update the height of the itemDetails view
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      const height = expanded[id] ? 0 : 'auto';
+      setItemDetailsHeight((prevItemDetailsHeight) => ({ ...prevItemDetailsHeight, [id]: height }));
+    };
+  
+    const handleCopy = (item) => {
+      const complaintDetails = `Name: ${item.name}\nEmail: ${item.email}\nComplain Type: ${item.complainType}\nComplain: ${item.complain}\nCreated At: ${item.createdAt}`;
+      Clipboard.setString(complaintDetails);
+      Alert.alert('Success', 'Complaint details copied to clipboard');
+    };
+  
+    const handleCopyId = (id) => {
+      Clipboard.setString(id);
+      Alert.alert('ID Copied', `ID: ${id} has been copied to clipboard`);
+    };
   
   const handleRefresh = () => {
     setLoading(true);
@@ -138,6 +176,7 @@ const [complaintsPerPage, setComplaintsPerPage] = useState(10);
           </TouchableOpacity>
         </View>
         <View style={[styles.itemDetails, itemDetailsHeightStyle]}>
+        <Text style={styles.itemDescription}>ID: {item.id}</Text>
           <Text style={styles.itemDescription}>Name: {item.name}</Text>
           <TouchableOpacity onPress={() => Linking.openURL(`mailto:${item.email}`)}>
             <Text style={styles.itemDescription}>Email: {item.email}</Text>
@@ -165,6 +204,7 @@ const [complaintsPerPage, setComplaintsPerPage] = useState(10);
 return (
 
 <View style={styles.container}>
+<Circles />
 <Text style={styles.title}>Complaints List</Text>
 <View style={styles.dateTimeContainer}>
         <Text style={styles.dateTime}>{dateTime.toLocaleString()}</Text>
@@ -346,6 +386,7 @@ const styles = StyleSheet.create({
       },
       dateTime: {
         fontSize: 12,
+        color: 'DarkBlue',
       },
       loadMoreContainer: {
         flex: 1,

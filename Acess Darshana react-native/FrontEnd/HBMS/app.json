@@ -7,10 +7,10 @@
     "icon": "./assets/high.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/high.png",
-      "resizeMode": "contain",
+      "image": "./assets/bus_refresh.json",
       "backgroundColor": "#ffffff"
-    },
+   },
+   
     "assetBundlePatterns": [
       "**/*"
     ],

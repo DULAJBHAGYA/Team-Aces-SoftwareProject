@@ -1,48 +1,93 @@
-import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  Dimensions,
-} from 'react-native';
+import React, {useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, Animated, Easing } from 'react-native';
 
 import { FontAwesome } from '@expo/vector-icons';
-import * as Font from 'expo-font';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Circles  from '../../Data/Circles.js';
+
+
+import * as Font from 'expo-font';
+
+
 const HomeScreen = ({ navigation }) => {
-  useEffect(() => {
-    async function loadFonts() {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [buttonIndex, setButtonIndex] = useState(0);
+  const opacityValue = useRef(new Animated.Value(0)).current;
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  
+
+  const loadFonts = async () => {
+    try {
       await Font.loadAsync({
         'Poppins-Regular': require('../../assets/Fonts/Poppins-Regular.ttf'),
         'Poppins-Bold': require('../../assets/Fonts/Poppins-Bold.ttf'),
       });
+      setFontsLoaded(true);
+    } catch (error) {
+      console.log('Error loading fonts:', error);
     }
+  };
+  const startAnimation = () => {
+    Animated.timing(opacityValue, {
+      toValue: 1,
+      duration: 250,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start(() => setButtonIndex(1));
+  };
+
+  useEffect(() => {
     loadFonts();
   }, []);
 
   useEffect(() => {
-    navigation.setOptions({
-      title: 'Home',
-      headerTintColor: 'darkblue',
-      headerStyle: {
-        backgroundColor: 'white',
-      },
-      headerTitleStyle: {
-        fontWeight: 'bold',
-        fontFamily: 'Poppins-Regular',
-        fontSize: 30,
-      },
-      headerRight: () => (
-        <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-          <FontAwesome name="gear" size={24} color="darkblue" style={styles.icon} />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
+    if (fontsLoaded) {
+      navigation.setOptions({
+        title: 'Home',
+        headerTintColor: 'darkblue',
+        headerStyle: {
+          backgroundColor: 'white',
+        },
+        headerTitleStyle: {
+          fontWeight: 'bold',
+          fontFamily: 'Poppins-Regular',
+          fontSize: 30,
+        },
+        headerRight: () => (
+          <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+            <FontAwesome name="gear" size={24} color="darkblue" style={styles.icon} />
+          </TouchableOpacity>
+        ),
+      });
+      Animated.timing(opacityValue, {
+        toValue: 1,
+        duration: 1000,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }).start(() => setButtonIndex(1));
+    }
+  }, [navigation, fontsLoaded]);
 
+ useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      startAnimation();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+  
+  useEffect(() => {
+    if (buttonIndex < 5) {
+      Animated.timing(opacityValue, {
+        toValue: 1,
+        duration: 125,
+        easing: Easing.ease,
+        useNativeDriver: true,
+        delay: 20,
+      }).start(() => setButtonIndex(buttonIndex + 1));
+    }
+  }, [buttonIndex]);
   return (
     <SafeAreaView style={styles.container}>
        <Circles /> 
@@ -56,9 +101,24 @@ const HomeScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, styles.contactsButton]}
-          onPress={() => navigation.navigate('Map')}>
+      <TouchableOpacity
+              style={[
+                styles.button,
+                styles.contactsButton,
+                {
+                  opacity: buttonIndex >= 1 ? 1 : 0,
+                  transform: [
+                    {
+                      translateY: opacityValue.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [-50, 0],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+              onPress={() => navigation.navigate('Map')}
+            >
           <FontAwesome
             name="address-book"
             size={24}
@@ -69,7 +129,19 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, styles.viewAllButton]}
+          style={[styles.button, styles.viewAllButton,
+            {
+              opacity: buttonIndex >= 2 ? 1 : 0,
+              transform: [
+                {
+                  translateY: opacityValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-50, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
           onPress={() => navigation.navigate('Contact')}>
           <FontAwesome
             name="th-list"
@@ -81,7 +153,19 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, styles.helpButton]}
+          style={[styles.button, styles.helpButton,
+            {
+              opacity: buttonIndex >= 3 ? 1 : 0,
+              transform: [
+                {
+                  translateY: opacityValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-50, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
           onPress={() => navigation.navigate('Help_Support')}>
           <FontAwesome
             name="question-circle"
@@ -93,7 +177,19 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, styles.complainButton]}
+          style={[styles.button, styles.complainButton,
+            {
+              opacity: buttonIndex >= 4 ? 1 : 0,
+              transform: [
+                {
+                  translateY: opacityValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-50, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
           onPress={() => navigation.navigate('Complain')}>
           <FontAwesome
             name="exclamation-circle"
@@ -105,7 +201,19 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.button, styles.faqButton]}
+          style={[styles.button, styles.faqButton,
+            {
+              opacity: buttonIndex >= 5 ? 1 : 0,
+              transform: [
+                {
+                  translateY: opacityValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-50, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
           onPress={() => navigation.navigate('Faq')}>
           <FontAwesome
             name="question-circle"
@@ -151,7 +259,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'darkblue',
     fontSize: 18,
-    fontFamily: 'Poppins-Bold',
     marginLeft: 20,
   },
   buttonIcon: {
@@ -162,23 +269,23 @@ const styles = StyleSheet.create({
   },
   contactsButton: {
     backgroundColor: '#CCE5FF',
-    elevation: 2,
+    elevation: 10,
   },
   viewAllButton: {
     backgroundColor: '#FFEDCC',
-    elevation: 2,
+    elevation: 10,
   },
   helpButton: {
     backgroundColor: '#D1E0E0',
-    elevation: 2,
+    elevation: 10,
   },
   complainButton: {
     backgroundColor: '#FFCCE5',
-    elevation: 2,
+    elevation: 10,
   },
   faqButton: {
     backgroundColor: '#D6C2FF',
-    elevation: 2,
+    elevation: 10,
   },
 });
 

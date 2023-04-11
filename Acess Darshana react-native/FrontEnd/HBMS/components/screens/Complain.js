@@ -27,12 +27,14 @@ import SuccessModal from "../../Data/SuccessModal.js";
 import * as ImagePicker from 'expo-image-picker';
 import { ToastAndroid } from 'react-native';
 
+import { loadAsync } from "expo-font";
 
 import * as Font from "expo-font";
 
 export default function Complain({ navigation }) {
   const [emailIsValid, setEmailIsValid] = useState(false);
   const emailRegex = /^\S+@\S+\.\S+$/;
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -78,15 +80,22 @@ export default function Complain({ navigation }) {
   };
 
   useEffect(() => {
-    async function loadFonts() {
-      await Font.loadAsync({
-        "Poppins-Regular": require("../../assets/Fonts/Poppins-Regular.ttf"),
-        "Poppins-Bold": require("../../assets/Fonts/Poppins-Bold.ttf"),
-      });
-    }
-
+    const loadFonts = async () => {
+      try {
+        await Font.loadAsync({
+          'Poppins-Regular': require('../../assets/Fonts/Poppins-Regular.ttf'),
+          'Poppins-Bold': require('../../assets/Fonts/Poppins-Bold.ttf'),
+        });
+        setFontsLoaded(true);
+      } catch (error) {
+        console.log('Error loading fonts:', error);
+      }
+    };
+    
     loadFonts();
   }, []);
+  
+  
 
   useEffect(() => {
     navigation.setOptions({
@@ -337,7 +346,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontFamily: 'Poppins-Regular',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
@@ -347,7 +355,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'darkblue',
     borderRadius: 10,
-    fontFamily: 'Poppins-Regular',
     fontSize: 16,
     padding: 10,
     alignContent: 'center',
@@ -356,7 +363,6 @@ const styles = StyleSheet.create({
     borderWidth:2,
     borderColor: 'darkblue',
     borderRadius: 10,
-    fontFamily: 'Poppins-Regular',
     fontSize: 16,
     padding: 10,
     height: 50,
@@ -383,7 +389,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   ViewButtonText: {
-    fontFamily: 'Poppins-regular',
+   
     color: 'darkblue',
     fontSize: 18,
     textDecorationLine: 'underline',
